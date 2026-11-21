@@ -1,0 +1,826 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Customs Cross-Check</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: manifest ledger - hero band, stat strip, eight shipment dockets each holding a field x document agreement matrix, findings ledger below, detail drawer over the top. */
+:root{
+  --paper:#f3f0ea;
+  --card:#fffdf9;
+  --ink:#151c24;
+  --ink-soft:#56626f;
+  --rule:#d9d3c7;
+  --rule-soft:#e8e3d9;
+  --harbour:#1b4d64;
+  --stamp:#a9641b;
+  --alert:#a62a20;
+  --verdigris:#2d6a51;
+  --wash:rgba(27,77,100,.07);
+  --font-display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1418; --card:#171e25; --ink:#e9e3d8; --ink-soft:#96a2ae;
+  --rule:#2a343d; --rule-soft:#222b33;
+  --harbour:#6fb6d2; --stamp:#d9a24a; --alert:#e0685c; --verdigris:#5fb38e;
+  --wash:rgba(111,182,210,.09);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#0f1418; --card:#171e25; --ink:#e9e3d8; --ink-soft:#96a2ae;
+  --rule:#2a343d; --rule-soft:#222b33;
+  --harbour:#6fb6d2; --stamp:#d9a24a; --alert:#e0685c; --verdigris:#5fb38e;
+  --wash:rgba(111,182,210,.09);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:var(--harbour);color:#f6f2ea;
+  margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 2.6rem);padding-bottom:2.4rem}
+:root[data-theme="dark"] .hero,.hero{--hero-fg:#f6f2ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero{background:#102833}}
+:root[data-theme="dark"] .hero{background:#102833}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 46px)}
+.hero .sweep{position:absolute;top:0;bottom:0;width:38%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.14),transparent);
+  animation:sweep 7.5s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes sweep{0%{transform:translateX(-120%)}55%,100%{transform:translateX(360%)}}
+.eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;opacity:.82}
+.hero h1{font-size:clamp(2rem,6vw,3.3rem);font-weight:800;letter-spacing:-.02em;line-height:1.02;margin:.5rem 0 .6rem}
+.hero p{max-width:60ch;margin:0;color:rgba(246,242,234,.84);font-size:1.02rem}
+.hero .stamp{display:inline-flex;align-items:center;gap:.5rem;margin-top:1.3rem;border:1.5px solid rgba(246,242,234,.5);
+  border-radius:3px;padding:.38rem .7rem;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.stamp .dot{width:7px;height:7px;border-radius:50%;background:#f0b24a;animation:blip 2.2s ease-in-out infinite}
+@keyframes blip{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}
+
+/* ---------- stat strip ---------- */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--rule);
+  border-bottom:1px solid var(--rule)}
+.stat{background:var(--card);padding:1.1rem 1.15rem}
+.stat .k{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+.stat .v{font-family:var(--font-display);font-size:2.05rem;font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .n{font-size:.8rem;color:var(--ink-soft)}
+.stat.flag .v{color:var(--alert)}
+.stat.clear .v{color:var(--verdigris)}
+.bar{height:4px;border-radius:2px;background:var(--rule-soft);margin-top:.55rem;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--harbour);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.stat.flag .bar i{background:var(--alert)}
+.stat.clear .bar i{background:var(--verdigris)}
+
+/* ---------- controls ---------- */
+.tools{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;padding-block:1.4rem .9rem}
+.chip{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;
+  background:transparent;color:var(--ink-soft);border:1px solid var(--rule);border-radius:2px;padding:.45rem .7rem;
+  transition:background .18s,color .18s,border-color .18s,transform .18s}
+.chip:hover{transform:translateY(-1px);border-color:var(--harbour);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--harbour);border-color:var(--harbour);color:#f6f2ea}
+.chip .c{opacity:.7;margin-left:.35rem}
+.tools .spacer{flex:1 1 auto}
+.legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.74rem;color:var(--ink-soft);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.sw{width:11px;height:11px;border-radius:2px;display:inline-block}
+.sw.ok{background:var(--verdigris)}
+.sw.bad{background:var(--alert)}
+.sw.blur{background:repeating-linear-gradient(45deg,var(--stamp) 0 3px,transparent 3px 6px);border:1px solid var(--stamp)}
+.sw.one{background:var(--rule);border:1px solid var(--ink-soft)}
+
+/* ---------- dockets ---------- */
+.dockets{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1rem;padding-bottom:2.2rem}
+.docket{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:1rem 1rem 1.1rem;
+  position:relative;overflow:hidden;cursor:pointer;text-align:left;font:inherit;color:inherit;display:block;width:100%;
+  animation:rise .5s both cubic-bezier(.2,.8,.2,1);transition:transform .2s,box-shadow .2s,border-color .2s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.docket:hover,.docket:focus-visible{transform:translateY(-3px);box-shadow:0 10px 26px -12px rgba(21,28,36,.35);border-color:var(--harbour)}
+.docket:focus-visible{outline:2px solid var(--harbour);outline-offset:2px}
+.docket::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--verdigris)}
+.docket.has-flag::before{background:var(--alert)}
+.docket.has-soft::before{background:var(--stamp)}
+.dk-head{display:flex;gap:.8rem;align-items:flex-start;justify-content:space-between}
+.dk-id{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.12em;color:var(--ink-soft)}
+.dk-title{font-family:var(--font-display);font-size:1.02rem;font-weight:600;letter-spacing:-.01em;margin-top:.15rem}
+.dk-sub{font-size:.8rem;color:var(--ink-soft);margin-top:.15rem}
+.gauge{flex:0 0 auto;width:58px;height:58px;position:relative}
+.gauge svg{transform:rotate(-90deg);display:block}
+.gauge circle{fill:none;stroke-width:5;stroke-linecap:round}
+.gauge .track{stroke:var(--rule-soft)}
+.gauge .run{stroke:var(--verdigris);transition:stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1)}
+.docket.has-flag .gauge .run{stroke:var(--alert)}
+.docket.has-soft .gauge .run{stroke:var(--stamp)}
+.gauge b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-mono);font-size:.74rem;font-weight:600}
+
+/* matrix */
+.matrix{margin-top:.95rem;display:grid;gap:3px;grid-template-columns:auto repeat(5,1fr)}
+.mx-h{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);
+  text-align:center;padding-bottom:.15rem}
+.mx-r{font-family:var(--font-mono);font-size:.62rem;color:var(--ink-soft);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:9.5rem;padding-right:.3rem;align-self:center}
+.cell{height:15px;border-radius:2px;background:var(--rule-soft);position:relative;
+  animation:pop .4s both cubic-bezier(.2,.9,.2,1)}
+@keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+.cell.ok{background:var(--verdigris);opacity:.85}
+.cell.one{background:var(--rule);border:1px solid var(--rule)}
+.cell.none{background:transparent;border:1px dashed var(--rule)}
+.cell.bad{background:var(--alert);animation:pop .4s both cubic-bezier(.2,.9,.2,1),throb 1.9s 1s ease-in-out infinite}
+.cell.blur{background:repeating-linear-gradient(45deg,var(--stamp) 0 3px,transparent 3px 6px);border:1px solid var(--stamp)}
+.cell.gap{background:var(--stamp);opacity:.85;animation:pop .4s both cubic-bezier(.2,.9,.2,1),throb 2.4s 1s ease-in-out infinite}
+@keyframes throb{0%,100%{box-shadow:0 0 0 0 rgba(166,42,32,0)}50%{box-shadow:0 0 0 3px rgba(166,42,32,.28)}}
+.dk-foot{margin-top:.85rem;display:flex;flex-wrap:wrap;gap:.4rem}
+.tag{font-family:var(--font-mono);font-size:.63rem;letter-spacing:.05em;text-transform:uppercase;
+  border-radius:2px;padding:.2rem .42rem;border:1px solid}
+.tag.bad{color:var(--alert);border-color:var(--alert);background:rgba(166,42,32,.07)}
+.tag.soft{color:var(--stamp);border-color:var(--stamp);background:rgba(169,100,27,.08)}
+.tag.ok{color:var(--verdigris);border-color:var(--verdigris);background:rgba(45,106,81,.08)}
+
+/* ---------- findings ---------- */
+.section-h{display:flex;align-items:baseline;gap:.8rem;border-top:1px solid var(--rule);padding-top:1.5rem;margin-bottom:1rem}
+.section-h h2{font-size:1.35rem;font-weight:700;letter-spacing:-.01em}
+.section-h .count{font-family:var(--font-mono);font-size:.74rem;color:var(--ink-soft)}
+.finding{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--alert);border-radius:3px;
+  padding:.9rem 1rem;margin-bottom:.6rem;display:grid;grid-template-columns:auto 1fr;gap:.2rem .9rem;align-items:start}
+.finding.soft{border-left-color:var(--stamp)}
+.finding .sev{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--alert);align-self:center;white-space:nowrap}
+.finding.soft .sev{color:var(--stamp)}
+.finding .ttl{font-weight:600;font-size:.95rem;grid-column:2}
+.finding .dl{grid-column:2;display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.4rem}
+.val{font-family:var(--font-mono);font-size:.74rem;border:1px solid var(--rule);border-radius:2px;padding:.18rem .42rem;background:var(--wash)}
+.val b{font-weight:600;color:var(--ink-soft);margin-right:.35rem}
+.val.off{border-color:var(--alert);color:var(--alert)}
+.finding .why{grid-column:2;font-size:.84rem;color:var(--ink-soft);margin-top:.45rem}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(10,16,20,.52);backdrop-filter:blur(2px);z-index:40;opacity:0;transition:opacity .25s}
+.scrim.on{opacity:1}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--paper);z-index:41;
+  border-left:1px solid var(--rule);overflow-y:auto;transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 2rem)}
+.drawer.on{transform:none}
+.dr-pad{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+.dr-head{background:var(--card);border-bottom:1px solid var(--rule);padding-block:1.1rem}
+.dr-head h3{font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+.close{position:absolute;top:calc(env(safe-area-inset-top,0px) + .7rem);right:max(14px,env(safe-area-inset-right,0px));
+  background:var(--card);border:1px solid var(--rule);border-radius:3px;color:var(--ink);cursor:pointer;
+  font-family:var(--font-mono);font-size:.72rem;padding:.3rem .55rem}
+.close:hover{border-color:var(--harbour)}
+.frow{border-bottom:1px solid var(--rule-soft);padding-block:.8rem;animation:slidein .36s both}
+@keyframes slidein{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.frow .fh{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.frow .fn{font-weight:600;font-size:.9rem}
+.frow .fs{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
+.fs.ok{color:var(--verdigris)}.fs.bad{color:var(--alert)}.fs.soft{color:var(--stamp)}.fs.one{color:var(--ink-soft)}
+.frow .vl{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem}
+.vrow{display:grid;grid-template-columns:4.6rem 1fr;gap:.6rem;align-items:baseline;font-size:.82rem}
+.vrow .d{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase}
+.vrow .t{font-family:var(--font-mono);font-size:.8rem;word-break:break-word;min-width:0}
+.vrow.off .t{color:var(--alert);font-weight:600}
+.vrow .ev{font-size:.72rem;color:var(--ink-soft);font-family:var(--font-body)}
+footer{border-top:1px solid var(--rule);padding-block:1.6rem 2.4rem;color:var(--ink-soft);font-size:.8rem}
+footer p{max-width:70ch;margin:.3rem 0}
+@media (max-width:460px){
+  .matrix{grid-template-columns:auto repeat(5,1fr)}
+  .mx-r{max-width:6.6rem;font-size:.58rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important}
+}
+</style>
+
+<header class="hero">
+  <div class="sweep" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="eyebrow">Four-corner check &middot; 8 consignments</div>
+    <h1>Customs Cross-Check</h1>
+    <p>Every field read off the bill of lading or air waybill, the invoice, the packing list, the certificate of origin and the customs declaration, laid side by side. Where the documents disagree, the cell turns red.</p>
+    <div class="stamp"><span class="dot" aria-hidden="true"></span><span>First reading &middot; second reader pending</span></div>
+  </div>
+</header>
+
+<section class="strip" id="strip" aria-label="Summary"></section>
+
+<main class="wrap">
+  <div class="tools" role="group" aria-label="Filter consignments">
+    <button class="chip" data-f="all" aria-pressed="true">All<span class="c" data-c="all"></span></button>
+    <button class="chip" data-f="bad" aria-pressed="false">Disagreements<span class="c" data-c="bad"></span></button>
+    <button class="chip" data-f="soft" aria-pressed="false">Unreadable or blank<span class="c" data-c="soft"></span></button>
+    <button class="chip" data-f="ok" aria-pressed="false">Fully agreed<span class="c" data-c="ok"></span></button>
+    <span class="spacer"></span>
+    <div class="legend">
+      <span><i class="sw ok"></i>agrees</span>
+      <span><i class="sw bad"></i>differs</span>
+      <span><i class="sw blur"></i>unreadable</span>
+      <span><i class="sw one"></i>single source</span>
+    </div>
+  </div>
+
+  <div class="dockets" id="dockets"></div>
+
+  <div class="section-h"><h2>Findings ledger</h2><span class="count" id="fcount"></span></div>
+  <div id="findings"></div>
+
+  <footer>
+    <p>Readings are the AI first reader's. Nothing here has been through a second reader, so every value still carries one pair of eyes only.</p>
+    <p>HS codes are compared on the first six digits, so a declaration that extends the invoice code to eight or ten digits counts as agreement. Package counts and weights are compared on their digits, so "24 pallets" and "24" agree. Company names are compared ignoring case and punctuation, so "WLL" and "W.L.L." agree.</p>
+  </footer>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Consignment detail" tabindex="-1">
+  <button class="close" id="close" type="button">Close</button>
+  <div class="dr-head"><div class="dr-pad wrap" id="drHead"></div></div>
+  <div class="dr-pad" id="drBody"></div>
+</aside>
+
+<script>
+/* ---------- source readings: shipment | document | field | value | status | evidence ---------- */
+const RAW = `
+S01|BL|SH|Kovalmere Castings Pvt. Ltd.|H|Shipper box, top left
+S01|INV|SH|Kovalmere Castings Pvt. Ltd.|H|Seller / exporter box, top left
+S01|PL|SH|Kovalmere Castings Pvt. Ltd.|H|Shipper / exporter box, top left
+S01|COO|SH|Kovalmere Castings Pvt. Ltd.|H|Exporter box
+S01|DEC|SH|Kovalmere Castings Pvt. Ltd.|H|Exporter (shipper) box, top right
+S01|BL|CN|Hollowmere Pump Services W.L.L.|H|Consignee box, left column row 2
+S01|INV|CN|Hollowmere Pump Services W.L.L.|H|Buyer / consignee box, left
+S01|PL|CN|Hollowmere Pump Services W.L.L.|H|Consignee box, left
+S01|COO|CN|Hollowmere Pump Services W.L.L.|H|Consignee box
+S01|DEC|CN|Hollowmere Pump Services W.L.L.|H|Importer (consignee) box, top left
+S01|INV|IN|KC/EXP/26/0418|H|Invoice no. box, top right
+S01|PL|IN|KC/EXP/26/0418|H|Invoice no. (reference) box, right
+S01|COO|IN|KC/EXP/26/0418|H|Invoice no. (reference) box, left
+S01|DEC|IN|KC/EXP/26/0418|H|Invoice no. box, right
+S01|BL|GD|Cast-iron pump impellers, machined|H|Description of goods box, particulars section
+S01|INV|GD|Cast-iron pump impellers, machined|H|Description of goods box
+S01|PL|GD|Cast-iron pump impellers, machined|H|Description of goods box
+S01|COO|GD|Cast-iron pump impellers, machined|H|Description of goods box
+S01|DEC|GD|Cast-iron pump impellers, machined|H|Goods description box
+S01|INV|HS|8413.91|H|HS code column of the goods table
+S01|DEC|HS|8413.91.90|H|Commodity code box
+S01|BL|PK|24 WOODEN CRATES|H|Number and kind of packages box
+S01|INV|PK|24 wooden crates|H|Packages box, totals block right
+S01|PL|PK|24 wooden crates|H|Totals table, Number of packages column
+S01|DEC|PK|24|H|Number of packages box
+S01|BL|GW|6,480|H|Gross weight (kg) box, particulars section
+S01|INV|GW|6,480|H|Gross weight (kg) box, totals block left
+S01|PL|GW|6,480|H|Totals table, Gross weight (kg) column
+S01|DEC|GW|6,480|H|Gross weight (kg) box
+S01|INV|VA|USD 48,960.00|H|Total invoice value box, totals block left
+S01|DEC|VA|USD 48,960.00|H|Invoice value and currency box
+S01|INV|CO|India|H|Country of origin of the goods box, right
+S01|COO|CO|India|H|Country of origin box (framed)
+S01|DEC|CO|India|H|Country of origin box
+S01|BL|CT|SMLU 482013 6|H|Container no. box, particulars section
+S01|PL|CT|SMLU 482013 6|H|Container no. box, right
+S01|DEC|CT|SMLU 482013 6|H|Container no. box, left
+S01|DEC|DN|CCA-D-26-004417|H|Declaration number box, top
+S02|BL|SH|Lumenfold Lighting Co., Ltd.|H|Shipper box, top left
+S02|INV|SH|Lumenfold Lighting Co., Ltd.|H|Seller / exporter box, top left
+S02|PL|SH|Lumenfold Lighting Co., Ltd.|H|Shipper / exporter box, top left
+S02|DEC|SH|Lumenfold Lighting Co., Ltd.|H|Exporter (shipper) box, top right
+S02|BL|CN|Brackwater Lighting Trading WLL|H|Consignee box, left column row 2
+S02|INV|CN|Brackwater Lighting Trading W.L.L.|H|Buyer / consignee box, left
+S02|PL|CN|BRACKWATER LIGHTING TRADING W.L.L.|H|Consignee box, left
+S02|DEC|CN|Brackwater Lighting Trading W.L.L.|H|Importer (consignee) box, top left
+S02|INV|IN|LF-2026-0917|H|Invoice no. box, top right
+S02|PL|IN|LF-2026-0917|H|Invoice no. (reference) box, right
+S02|DEC|IN|LF-2026-0917|H|Invoice no. box, right
+S02|BL|GD|LED panel lights 600 x 600 mm, 40 W|H|Description of goods box, particulars section
+S02|INV|GD|LED panel lights 600 x 600 mm, 40 W|H|Description of goods box
+S02|PL|GD|LED panel lights 600 x 600 mm, 40 W|H|Description of goods box
+S02|DEC|GD|LED panel lights 600 x 600 mm, 40 W|H|Goods description box
+S02|INV|HS|9405.11|H|HS code column of the goods table
+S02|DEC|HS|9405.11.00|H|Commodity code box
+S02|BL|PK|300 CARTONS|H|Number and kind of packages box
+S02|INV|PK|300 cartons|H|Packages box, totals block right
+S02|PL|PK|300 cartons|H|Totals table, Number of packages column
+S02|DEC|PK|300|H|Number of packages box
+S02|BL|GW|3,960|H|Gross weight (kg) box, particulars section
+S02|INV|GW|3,960|H|Gross weight (kg) box, totals block left
+S02|PL|GW|3,960|H|Totals table, Gross weight (kg) column
+S02|DEC|GW|3,960|H|Gross weight (kg) box
+S02|INV|VA|USD 17,400.00|H|Total invoice value box, totals block left
+S02|DEC|VA|USD 17,400.00|H|Invoice value and currency box
+S02|INV|CO|China|H|Country of origin of the goods box, right
+S02|DEC|CO|China|H|Country of origin box
+S02|BL|CT|SMLU 517204 3|H|Container no. box, particulars section
+S02|PL|CT|SMLU 517204 3|H|Container no. box, right
+S02|DEC|CT|SMLU 517204 3|H|Container no. box, left
+S02|DEC|DN|CCA-D-26-004431|H|Declaration number box, top
+S03|AWB|SH|Ostervik Laborglas GmbH|H|Shipper box, top left
+S03|INV|SH|Ostervik Laborglas GmbH|H|Seller / exporter box, top left
+S03|PL|SH|Ostervik Laborglas GmbH|H|Shipper / exporter box, top left
+S03|DEC|SH|Ostervik Laborglas GmbH|H|Exporter (shipper) box, top right
+S03|AWB|CN|Lindqvale Laboratory Supplies W.L.L.|H|Consignee box, left column row 2
+S03|INV|CN|Lindqvale Laboratory Supplies W.L.L.|H|Buyer / consignee box, left
+S03|PL|CN|Lindqvale Laboratory Supplies W.L.L.|H|Consignee box, left
+S03|DEC|CN|Lindqvale Laboratory Supplies W.L.L.|H|Importer (consignee) box, top left
+S03|INV|IN|OLG-26-3307|H|Invoice no. box, top right
+S03|PL|IN|OLG-26-3307|H|Invoice no. (reference) box, right
+S03|DEC|IN|OLG-26-3307|H|Invoice no. box, right
+S03|AWB|GD|Borosilicate laboratory glassware|H|Nature and quantity of goods box
+S03|INV|GD|Borosilicate laboratory glassware|H|Description of goods box
+S03|PL|GD|Borosilicate laboratory glassware|H|Description of goods box
+S03|DEC|GD|Borosilicate laboratory glassware|H|Goods description box
+S03|INV|HS|7017.20|H|HS code column of the goods table
+S03|DEC|HS|7017.20.00|H|Commodity code box
+S03|AWB|PK|16|H|No. of pieces box
+S03|INV|PK|18 cartons|H|Packages box, totals block right
+S03|PL|PK|16 cartons|H|Totals table, Number of packages column
+S03|DEC|PK|16|H|Number of packages box
+S03|AWB|GW|412|H|Gross weight (kg) box
+S03|INV|GW|412|H|Gross weight (kg) box, totals block left
+S03|PL|GW|412|H|Totals table, Gross weight (kg) column
+S03|DEC|GW|412|H|Gross weight (kg) box
+S03|INV|VA|EUR 9,840.00|H|Total invoice value box, totals block left
+S03|DEC|VA|EUR 9,840.00|H|Invoice value and currency box
+S03|INV|CO|Germany|H|Country of origin of the goods box, right
+S03|DEC|CO|Germany|H|Country of origin box
+S03|AWB|CT|AKC-26-104417|H|Air waybill no. box, top right
+S03|PL|CT|AKC-26-104417|H|Air waybill no. box, right
+S03|DEC|CT|AKC-26-104417|H|Transport document (AWB) no. box, right
+S03|DEC|DN|CCA-D-26-004452|H|Declaration number box, top
+S04|BL|SH|Azulvera Ceramica S.L.|H|Shipper box, top left
+S04|INV|SH|Azulvera Ceramica S.L.|H|Seller / exporter box, top left
+S04|PL|SH|Azulvera Ceramica S.L.|H|Shipper / exporter box, top left
+S04|COO|SH|Azulvera Ceramica S.L.|H|Exporter box
+S04|DEC|SH|Azulvera Ceramica S.L.|H|Exporter (shipper) box, top right
+S04|BL|CN|Graniteholm Tile Interiors W.L.L.|H|Consignee box, left column row 2
+S04|INV|CN|Graniteholm Tile Interiors W.L.L.|H|Buyer / consignee box, left
+S04|PL|CN|Graniteholm Tile Interiors W.L.L.|H|Consignee box, left
+S04|COO|CN|Graniteholm Tile Interiors W.L.L.|H|Consignee box
+S04|DEC|CN|Graniteholm Tile Interiors W.L.L.|H|Importer (consignee) box, top left
+S04|INV|IN|AZV/26/1184|H|Invoice no. box, top right
+S04|PL|IN|AZV/26/1184|H|Invoice no. (reference) box, right
+S04|COO|IN|AZV/26/1184|H|Invoice no. (reference) box, left
+S04|DEC|IN|AZV/26/1184|H|Invoice no. box, right
+S04|BL|GD|Porcelain floor tiles 60 x 60 cm, matt|H|Description of goods box, particulars section
+S04|INV|GD|Porcelain floor tiles 60 x 60 cm, matt|H|Description of goods box
+S04|PL|GD|Porcelain floor tiles 60 x 60 cm, matt|H|Description of goods box
+S04|COO|GD|Porcelain floor tiles 60 x 60 cm, matt|H|Description of goods box
+S04|DEC|GD|Porcelain floor tiles 60 x 60 cm, matt|H|Goods description box
+S04|INV|HS|6907.21|H|HS code column of the goods table
+S04|DEC|HS|6907.21.00|H|Commodity code box
+S04|BL|PK|24 PALLETS|H|Number and kind of packages box
+S04|INV|PK|24 pallets|H|Packages box, totals block right
+S04|PL|PK|24 pallets|H|Totals table, Number of packages column
+S04|DEC|PK|24|H|Number of packages box
+S04|BL|GW|12,480|H|Gross weight (kg) box, particulars section
+S04|INV|GW|12,150|H|Gross weight (kg) box, totals block left
+S04|PL|GW|12,150|H|Totals table, Gross weight (kg) column
+S04|DEC|GW|12,150|H|Gross weight (kg) box
+S04|INV|VA|EUR 14,976.00|H|Total invoice value box, totals block left
+S04|DEC|VA|EUR 14,976.00|H|Invoice value and currency box
+S04|INV|CO|Spain|H|Country of origin of the goods box, right
+S04|COO|CO|Spain|H|Country of origin box (framed)
+S04|DEC|CO|Spain|H|Country of origin box
+S04|BL|CT|SMLU 390561 2|H|Container no. box, particulars section
+S04|PL|CT|SMLU 390561 2|H|Container no. box, right
+S04|DEC|CT|SMLU 390561 2|H|Container no. box, left
+S04|DEC|DN|CCA-D-26-004460|H|Declaration number box, top
+S05|AWB|SH|Caffevola Ricambi S.r.l.|H|Shipper box, top left
+S05|INV|SH|Caffevola Ricambi S.r.l.|H|Seller / exporter box, top left
+S05|PL|SH|Caffevola Ricambi S.r.l.|H|Shipper / exporter box, top left
+S05|DEC|SH|Caffevola Ricambi S.r.l.|H|Exporter (shipper) box, top right
+S05|AWB|CN|Cafferidge Hospitality Equipment W.L.L.|H|Consignee box, left column row 2
+S05|INV|CN|Cafferidge Hospitality Equipment W.L.L.|H|Buyer / consignee box, left
+S05|PL|CN|Cafferidge Hospitality Equipment W.L.L.|H|Consignee box, left
+S05|DEC|CN|Cafferidge Hospitality Equipment W.L.L.|H|Importer (consignee) box, top left
+S05|INV|IN|CR-26-00731|H|Invoice no. box, top right
+S05|PL|IN|CR-26-00731|H|Invoice no. (reference) box, right
+S05|DEC|IN|CR-26-00731|H|Invoice no. box, right
+S05|AWB|GD|Spare parts for commercial espresso machines|H|Nature and quantity of goods box
+S05|INV|GD|Spare parts for commercial espresso machines|H|Description of goods box
+S05|PL|GD|Spare parts for commercial espresso machines|H|Description of goods box
+S05|DEC|GD|Spare parts for commercial espresso machines|H|Goods description box
+S05|INV|HS|8516.90|H|HS code column of the goods table
+S05|DEC|HS|8516.71.00|H|Commodity code box
+S05|AWB|PK|6|H|No. of pieces box
+S05|INV|PK|6 cartons|H|Packages box, totals block right
+S05|PL|PK|6 cartons|H|Totals table, Number of packages column
+S05|DEC|PK|6|H|Number of packages box
+S05|AWB|GW|148|H|Gross weight (kg) box
+S05|INV|GW|148|H|Gross weight (kg) box, totals block left
+S05|PL|GW|148|H|Totals table, Gross weight (kg) column
+S05|DEC|GW|148|H|Gross weight (kg) box
+S05|INV|VA|EUR 6,385.40|H|Total invoice value box, totals block left
+S05|DEC|VA|EUR 6,385.40|H|Invoice value and currency box
+S05|INV|CO|Italy|H|Country of origin of the goods box, right
+S05|DEC|CO|Italy|H|Country of origin box
+S05|AWB|CT|AKC-26-104862|H|Air waybill no. box, top right
+S05|PL|CT|AKC-26-104862|H|Air waybill no. box, right
+S05|DEC|CT|AKC-26-104862|H|Transport document (AWB) no. box, right
+S05|DEC|DN|CCA-D-26-004475|H|Declaration number box, top
+S06|BL|SH|Halongreed Garment Co., Ltd.|H|Shipper box, top left
+S06|INV|SH|Halongreed Garment Co., Ltd.|H|Seller / exporter box, top left
+S06|PL|SH|Halongreed Garment Co., Ltd.|H|Shipper / exporter box, top left
+S06|COO|SH|Halongreed Garment Co., Ltd.|H|Exporter box
+S06|DEC|SH|Halongreed Garment Co., Ltd.|H|Exporter (shipper) box, top right
+S06|BL|CN|Tidebrook Apparel Trading W.L.L.|H|Consignee box, left column row 2
+S06|INV|CN|Tidebrook Apparel Trading W.L.L.|H|Buyer / consignee box, left
+S06|PL|CN|Tidebrook Apparel Trading W.L.L.|H|Consignee box, left
+S06|COO|CN|Tidebrook Apparel Trading W.L.L.|H|Consignee box
+S06|DEC|CN|Tidebrook Apparel Trading W.L.L.|H|Importer (consignee) box, top left
+S06|INV|IN|HG-26-0559|H|Invoice no. box, top right
+S06|PL|IN|HG-26-0559|H|Invoice no. (reference) box, right
+S06|COO|IN|HG-26-0559|H|Invoice no. (reference) box, left
+S06|DEC|IN|HG-26-0559|H|Invoice no. box, right
+S06|BL|GD|Men's cotton knitted T-shirts|H|Description of goods box, particulars section
+S06|INV|GD|Men's cotton knitted T-shirts|H|Description of goods box
+S06|PL|GD|Men's cotton knitted T-shirts|H|Description of goods box
+S06|COO|GD|Men's cotton knitted T-shirts|H|Description of goods box
+S06|DEC|GD|Men's cotton knitted T-shirts|H|Goods description box
+S06|INV|HS|6109.10|H|HS code column of the goods table
+S06|DEC|HS|6109.10.00|H|Commodity code box
+S06|BL|PK|160 CARTONS|H|Number and kind of packages box
+S06|INV|PK|160 cartons|H|Packages box, totals block right
+S06|PL|PK|160 cartons|H|Totals table, Number of packages column
+S06|DEC|PK|160|H|Number of packages box
+S06|BL|GW|2,880|H|Gross weight (kg) box, particulars section
+S06|INV|GW|2,880|H|Gross weight (kg) box, totals block left
+S06|PL|GW|2,880|H|Totals table, Gross weight (kg) column
+S06|DEC|GW|2,880|H|Gross weight (kg) box
+S06|INV|VA|USD 27,360.00|H|Total invoice value box, totals block left
+S06|DEC|VA|USD 27,360.00|H|Invoice value and currency box
+S06|INV|CO|Viet Nam|H|Country of origin of the goods box, right
+S06|COO|CO|Cambodia|H|Country of origin box (framed)
+S06|DEC|CO|Viet Nam|H|Country of origin box
+S06|BL|CT|SMLU 604418 7|H|Container no. box, particulars section
+S06|PL|CT|SMLU 604418 7|H|Container no. box, right
+S06|DEC|CT|SMLU 604418 7|H|Container no. box, left
+S06|DEC|DN|CCA-D-26-004488|H|Declaration number box, top
+S07|BL|SH|Kinabrook Gloves Sdn. Bhd.|H|Shipper box, top left
+S07|INV|SH|Kinabrook Gloves Sdn. Bhd.|H|Seller / exporter box, top left
+S07|PL|SH|Kinabrook Gloves Sdn. Bhd.|H|Shipper / exporter box, top left
+S07|COO|SH|Kinabrook Gloves Sdn. Bhd.|H|Exporter box
+S07|DEC|SH|Kinabrook Gloves Sdn. Bhd.|H|Exporter (shipper) box, top right
+S07|BL|CN|Saltwhistle Medical Supplies W.L.L.|H|Consignee box, left column row 2
+S07|INV|CN|Saltwhistle Medical Supplies W.L.L.|H|Buyer / consignee box, left
+S07|PL|CN|Saltwhistle Medical Supplies W.L.L.|H|Consignee box, left
+S07|COO|CN|Saltwhistle Medical Supplies W.L.L.|H|Consignee box
+S07|DEC|CN|Saltwhistle Medical Supplies W.L.L.|H|Importer (consignee) box, top left
+S07|INV|IN|KBG-26-2211|H|Invoice no. box, top right
+S07|PL|IN|KBG-26-2211|H|Invoice no. (reference) box, right
+S07|COO|IN|KBG-26-2211|H|Invoice no. (reference) box, left
+S07|DEC|IN|KBG-26-2211|H|Invoice no. box, right
+S07|BL|GD|Nitrile examination gloves, powder-free|H|Description of goods box, particulars section
+S07|INV|GD|Nitrile examination gloves, powder-free|H|Description of goods box
+S07|PL|GD|Nitrile examination gloves, powder-free|H|Description of goods box
+S07|COO|GD|Nitrile examination gloves, powder-free|H|Description of goods box
+S07|DEC|GD|Nitrile examination gloves, powder-free|H|Goods description box
+S07|INV|HS|4015.19|H|HS code column of the goods table
+S07|DEC|HS|4015.19.00|H|Commodity code box
+S07|BL|PK|640 CARTONS|H|Number and kind of packages box
+S07|INV|PK|640 cartons|H|Packages box, totals block right
+S07|PL|PK|CANNOT DETERMINE|X|Blur: the whole totals row (packages, net and gross weight) is smudged; no digits visible, also not after contrast enhancement
+S07|DEC|PK|640|H|Number of packages box
+S07|BL|GW|5,184|H|Gross weight (kg) box, particulars section
+S07|INV|GW|5,184|H|Gross weight (kg) box, totals block left
+S07|PL|GW|CANNOT DETERMINE|X|Blur: the whole totals row (packages, net and gross weight) is smudged; no digits visible, also not after contrast enhancement
+S07|DEC|GW|5,184|H|Gross weight (kg) box
+S07|INV|VA|USD 19,840.00|H|Total invoice value box, totals block left
+S07|DEC|VA|USD 19,840.00|H|Invoice value and currency box
+S07|INV|CO|Malaysia|H|Country of origin of the goods box, right
+S07|COO|CO|Malaysia|H|Country of origin box (framed)
+S07|DEC|CO|Malaysia|H|Country of origin box
+S07|BL|CT|SMLU 712950 4|H|Container no. box, particulars section
+S07|PL|CT|SMLU 712950 4|H|Container no. box, right
+S07|DEC|CT|SMLU 712950 4|H|Container no. box, left
+S07|DEC|DN|CCA-D-26-004503|H|Declaration number box, top
+S08|AWB|SH|Fenwray Scanning Systems Ltd.|H|Shipper box, top left
+S08|INV|SH|Fenwray Scanning Systems Ltd.|H|Seller / exporter box, top left
+S08|PL|SH|Fenwray Scanning Systems Ltd.|H|Shipper / exporter box, top left
+S08|DEC|SH|Fenwray Scanning Systems Ltd.|H|Exporter (shipper) box, top right
+S08|AWB|CN|Scanderley Retail Systems W.L.L.|H|Consignee box, left column row 2
+S08|INV|CN|Scanderley Retail Systems W.L.L.|H|Buyer / consignee box, left
+S08|PL|CN|Scanderley Retail Systems W.L.L.|H|Consignee box, left
+S08|DEC|CN|Scanderley Retail Systems W.L.L.|H|Importer (consignee) box, top left
+S08|INV|IN|FSS-26-1042|H|Invoice no. box, top right
+S08|PL|IN|FSS-26-1042|H|Invoice no. (reference) box, right
+S08|DEC|IN|FSS-26-1042|H|Invoice no. box, right
+S08|AWB|GD|Handheld barcode scanners with charging cradles|H|Nature and quantity of goods box
+S08|INV|GD|Handheld barcode scanners with charging cradles|H|Description of goods box
+S08|PL|GD|Handheld barcode scanners with charging cradles|H|Description of goods box
+S08|DEC|GD|Handheld barcode scanners with charging cradles|H|Goods description box
+S08|INV|HS|8471.90|H|HS code column of the goods table
+S08|DEC|HS|8471.90.00|H|Commodity code box
+S08|AWB|PK|12|H|No. of pieces box
+S08|INV|PK|12 cartons|H|Packages box, totals block right
+S08|PL|PK|12 cartons|H|Totals table, Number of packages column
+S08|DEC|PK|12|H|Number of packages box
+S08|AWB|GW|336|H|Gross weight (kg) box
+S08|INV|GW|336|H|Gross weight (kg) box, totals block left
+S08|PL|GW|336|H|Totals table, Gross weight (kg) column
+S08|DEC|GW|336|H|Gross weight (kg) box
+S08|INV|VA|GBP 20,760.00|H|Total invoice value box, totals block left
+S08|DEC|VA|GBP 20,760.00|H|Invoice value and currency box
+S08|INV|CO|United Kingdom|H|Country of origin of the goods box, right
+S08|DEC|CO|United Kingdom|H|Country of origin box
+S08|AWB|CT|AKC-26-105190|H|Air waybill no. box, top right
+S08|PL|CT|AKC-26-105190|H|Air waybill no. box, right
+S08|DEC|CT|AKC-26-105190|H|Transport document (AWB) no. box, right
+S08|DEC|DN||H|Declaration number box, top; box is empty (blank line)
+`;
+
+const FIELDS = [
+  ['SH','Shipper (exporter)'],
+  ['CN','Consignee (importer)'],
+  ['IN','Invoice number'],
+  ['GD','Goods description'],
+  ['HS','HS code'],
+  ['PK','Packages'],
+  ['GW','Gross weight (kg)'],
+  ['VA','Invoice value'],
+  ['CO','Country of origin'],
+  ['CT','Container / AWB no.'],
+  ['DN','Declaration number']
+];
+const FIELD_NAME = Object.fromEntries(FIELDS);
+const DOC_COLS = ['TR','INV','PL','COO','DEC'];
+const DOC_LABEL = {TR:'B/L · AWB',INV:'Invoice',PL:'Packing',COO:'Origin',DEC:'Declaration'};
+const GOODS = {
+  S01:['Cast-iron pump impellers','India → sea'],
+  S02:['LED panel lights','China → sea'],
+  S03:['Laboratory glassware','Germany → air'],
+  S04:['Porcelain floor tiles','Spain → sea'],
+  S05:['Espresso machine spares','Italy → air'],
+  S06:["Men's cotton T-shirts",'Viet Nam → sea'],
+  S07:['Nitrile examination gloves','Malaysia → sea'],
+  S08:['Handheld barcode scanners','United Kingdom → air']
+};
+
+/* ---------- parse ---------- */
+const rows = RAW.trim().split('\n').map(line => {
+  const p = line.split('|');
+  return {ship:p[0], doc:p[1], field:p[2], value:p[3], status:p[4], note:p[5] || ''};
+});
+
+/* ---------- comparison rules ---------- */
+const digits = s => (s.match(/\d/g) || []).join('');
+function key(field, value){
+  if(field === 'HS') return digits(value).slice(0,6);
+  if(field === 'PK' || field === 'GW') return digits(value);
+  return value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+
+const SHIPS = [...new Set(rows.map(r => r.ship))].sort();
+const model = {};
+for(const s of SHIPS){
+  const mine = rows.filter(r => r.ship === s);
+  const transport = mine.some(r => r.doc === 'AWB') ? 'AWB' : 'BL';
+  const docsPresent = new Set(mine.map(r => r.doc));
+  const fields = {};
+  for(const [fc] of FIELDS){
+    const reads = mine.filter(r => r.field === fc).map(r => ({
+      doc:r.doc, col:(r.doc === 'BL' || r.doc === 'AWB') ? 'TR' : r.doc,
+      value:r.value, status:r.status, note:r.note
+    }));
+    if(!reads.length){ fields[fc] = {reads:[], state:'none'}; continue; }
+    const unreadable = reads.filter(r => r.status === 'X');
+    const blank = reads.filter(r => r.status !== 'X' && r.value.trim() === '');
+    const good = reads.filter(r => r.status !== 'X' && r.value.trim() !== '');
+    const keys = [...new Set(good.map(r => key(fc, r.value)))];
+    let state;
+    if(blank.length) state = 'gap';
+    else if(keys.length > 1) state = 'bad';
+    else if(unreadable.length) state = 'blur';
+    else if(good.length === 1) state = 'one';
+    else state = 'ok';
+    // majority key, for marking the outlier
+    const tally = {};
+    good.forEach(r => { const k = key(fc, r.value); tally[k] = (tally[k] || 0) + 1; });
+    const major = Object.entries(tally).sort((a,b) => b[1] - a[1])[0];
+    reads.forEach(r => {
+      r.outlier = state === 'bad' && r.status !== 'X' && key(fc, r.value) !== major[0];
+    });
+    fields[fc] = {reads, state, majority:major ? major[0] : null};
+  }
+  const vals = Object.values(fields);
+  const bad = vals.filter(f => f.state === 'bad').length;
+  const blur = vals.filter(f => f.state === 'blur').length;
+  const gap = vals.filter(f => f.state === 'gap').length;
+  const ok = vals.filter(f => f.state === 'ok').length;
+  const checkable = vals.filter(f => ['ok','bad','blur','gap'].includes(f.state)).length;
+  model[s] = {
+    id:s, transport, docsPresent, fields, bad, blur, gap, ok, checkable,
+    score: checkable ? Math.round(100 * ok / checkable) : 100,
+    klass: bad ? 'bad' : (blur || gap) ? 'soft' : 'ok',
+    goods:(GOODS[s] || ['',''])[0], lane:(GOODS[s] || ['',''])[1]
+  };
+}
+
+const tot = {
+  reads: rows.length,
+  ships: SHIPS.length,
+  bad: SHIPS.reduce((n,s) => n + model[s].bad, 0),
+  soft: SHIPS.reduce((n,s) => n + model[s].blur + model[s].gap, 0),
+  clean: SHIPS.filter(s => model[s].klass === 'ok').length,
+  checks: SHIPS.reduce((n,s) => n + model[s].checkable, 0),
+  agreed: SHIPS.reduce((n,s) => n + model[s].ok, 0)
+};
+
+/* ---------- summary strip ---------- */
+const statDefs = [
+  {k:'Field readings', v:tot.reads, n:`across ${tot.ships} consignments, 5 document types`, pct:100, cls:''},
+  {k:'Cross-checks agreed', v:tot.agreed, n:`of ${tot.checks} fields carried on two or more documents`, pct:Math.round(100*tot.agreed/tot.checks), cls:'clear'},
+  {k:'Documents disagree', v:tot.bad, n:'fields where two documents state different things', pct:100, cls:'flag'},
+  {k:'Unreadable or blank', v:tot.soft, n:'fields that could not be read or were left empty', pct:100, cls:'flag'},
+  {k:'Clean consignments', v:tot.clean, n:`${tot.ships - tot.clean} need a human look before release`, pct:Math.round(100*tot.clean/tot.ships), cls:'clear'}
+];
+const strip = document.getElementById('strip');
+strip.innerHTML = statDefs.map((s,i) => `
+  <div class="stat ${s.cls}">
+    <div class="k">${s.k}</div>
+    <div class="v" data-to="${s.v}">0</div>
+    <div class="n">${s.n}</div>
+    <div class="bar"><i data-w="${s.pct}"></i></div>
+  </div>`).join('');
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+strip.querySelectorAll('.v').forEach((el,i) => {
+  const to = +el.dataset.to;
+  if(reduced || to === 0){ el.textContent = to; return; }
+  const dur = 900, t0 = performance.now() + i*70;
+  function step(now){
+    const p = Math.min(1, Math.max(0,(now - t0)/dur));
+    el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if(p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+});
+requestAnimationFrame(() => strip.querySelectorAll('.bar i').forEach(b => { b.style.width = b.dataset.w + '%'; }));
+
+/* ---------- dockets ---------- */
+const CIRC = 2 * Math.PI * 24;
+function docket(s, order){
+  const m = model[s];
+  const cells = FIELDS.map(([fc,label]) => {
+    const f = m.fields[fc];
+    const byCol = {};
+    f.reads.forEach(r => { byCol[r.col] = r; });
+    const row = DOC_COLS.map((col,ci) => {
+      const r = byCol[col];
+      if(!r) return `<div class="cell none" style="animation-delay:${40 + ci*22}ms" title="${label}: not on this document"></div>`;
+      let cls = 'ok';
+      if(r.status === 'X') cls = 'blur';
+      else if(r.value.trim() === '') cls = 'gap';
+      else if(r.outlier) cls = 'bad';
+      else if(f.state === 'bad') cls = 'ok';
+      else if(f.state === 'one') cls = 'one';
+      const txt = r.status === 'X' ? 'could not be read' : (r.value.trim() === '' ? 'left blank' : r.value);
+      return `<div class="cell ${cls}" style="animation-delay:${40 + ci*22}ms" title="${label} — ${DOC_LABEL[col]}: ${txt.replace(/"/g,'&quot;')}"></div>`;
+    }).join('');
+    return `<div class="mx-r" title="${label}">${label}</div>${row}`;
+  }).join('');
+
+  const tags = [];
+  if(m.bad) tags.push(`<span class="tag bad">${m.bad} disagreement${m.bad>1?'s':''}</span>`);
+  if(m.blur) tags.push(`<span class="tag soft">${m.blur} unreadable</span>`);
+  if(m.gap) tags.push(`<span class="tag soft">${m.gap} blank</span>`);
+  if(!m.bad && !m.blur && !m.gap) tags.push(`<span class="tag ok">all cross-checks agree</span>`);
+  if(!m.docsPresent.has('COO')) tags.push(`<span class="tag">no origin certificate</span>`);
+
+  return `<button class="docket has-${m.klass === 'ok' ? 'none' : m.klass}" data-s="${s}" style="animation-delay:${order*55}ms" type="button">
+    <div class="dk-head">
+      <div>
+        <div class="dk-id">${s} &middot; ${m.transport === 'AWB' ? 'air waybill' : 'bill of lading'}</div>
+        <div class="dk-title">${m.goods}</div>
+        <div class="dk-sub">${m.lane}</div>
+      </div>
+      <div class="gauge">
+        <svg width="58" height="58" viewBox="0 0 58 58" aria-hidden="true">
+          <circle class="track" cx="29" cy="29" r="24"></circle>
+          <circle class="run" cx="29" cy="29" r="24" stroke-dasharray="${CIRC}" stroke-dashoffset="${CIRC}" data-off="${CIRC * (1 - m.score/100)}"></circle>
+        </svg>
+        <b>${m.score}%</b>
+      </div>
+    </div>
+    <div class="matrix">
+      <div></div>${DOC_COLS.map(c => `<div class="mx-h">${DOC_LABEL[c].replace(' · ','<br>')}</div>`).join('')}
+      ${cells}
+    </div>
+    <div class="dk-foot">${tags.join('')}</div>
+  </button>`;
+}
+
+const host = document.getElementById('dockets');
+let filter = 'all';
+function matches(s){
+  const m = model[s];
+  if(filter === 'all') return true;
+  if(filter === 'bad') return m.bad > 0;
+  if(filter === 'soft') return (m.blur + m.gap) > 0;
+  if(filter === 'ok') return m.klass === 'ok';
+  return true;
+}
+function render(){
+  const list = SHIPS.filter(matches);
+  host.innerHTML = list.map((s,i) => docket(s,i)).join('');
+  requestAnimationFrame(() => host.querySelectorAll('.gauge .run').forEach(c => { c.style.strokeDashoffset = c.dataset.off; }));
+  host.querySelectorAll('.docket').forEach(d => d.addEventListener('click', () => open(d.dataset.s)));
+}
+document.querySelectorAll('[data-c]').forEach(el => {
+  const f = el.dataset.c;
+  const n = f === 'all' ? SHIPS.length : SHIPS.filter(s => {
+    const m = model[s];
+    return f === 'bad' ? m.bad > 0 : f === 'soft' ? (m.blur + m.gap) > 0 : m.klass === 'ok';
+  }).length;
+  el.textContent = n;
+});
+document.querySelectorAll('.chip').forEach(btn => btn.addEventListener('click', () => {
+  filter = btn.dataset.f;
+  document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+  render();
+}));
+render();
+
+/* ---------- findings ledger ---------- */
+const findings = [];
+for(const s of SHIPS){
+  const m = model[s];
+  for(const [fc,label] of FIELDS){
+    const f = m.fields[fc];
+    if(!['bad','blur','gap'].includes(f.state)) continue;
+    const chips = f.reads.map(r => {
+      const txt = r.status === 'X' ? 'unreadable' : (r.value.trim() === '' ? '(empty)' : r.value);
+      return `<span class="val ${r.outlier || r.status === 'X' || r.value.trim() === '' ? 'off' : ''}"><b>${DOC_LABEL[r.col].replace(' · ','/')}</b>${txt}</span>`;
+    }).join('');
+    let why, sev, soft = false;
+    if(f.state === 'bad'){
+      sev = 'conflict';
+      why = fc === 'CO'
+        ? 'The origin certificate names a different country from the invoice and the declaration. Preference treatment and duty both turn on this, so it has to be settled before release.'
+        : fc === 'HS'
+        ? 'The commodity code on the declaration is not the invoice code extended — it is a different heading. Duty rate depends on it.'
+        : fc === 'GW'
+        ? 'The transport document and the three commercial documents give different gross weights. One of the two figures is wrong by ' + 'a margin large enough to change freight and any weight-based charge.'
+        : 'Two documents in the same set state different quantities. The declaration follows one of them, so the other is either a typo or a short shipment.';
+    } else if(f.state === 'blur'){
+      sev = 'unreadable'; soft = true;
+      why = 'The packing list totals row is smudged, so this field has no second source. The figure on the other documents stands unconfirmed.';
+    } else {
+      sev = 'blank'; soft = true;
+      why = 'The box exists on the form but was left empty, so the set has no value to check at all.';
+    }
+    findings.push({s, fc, label, chips, why, sev, soft, order:soft ? 1 : 0});
+  }
+}
+findings.sort((a,b) => a.order - b.order || a.s.localeCompare(b.s));
+document.getElementById('findings').innerHTML = findings.map((f,i) => `
+  <div class="finding ${f.soft ? 'soft' : ''}" style="animation:rise .45s ${i*60}ms both">
+    <div class="sev">${f.sev}</div>
+    <div class="ttl">${f.s} &middot; ${f.label} &mdash; ${model[f.s].goods}</div>
+    <div class="dl">${f.chips}</div>
+    <div class="why">${f.why}</div>
+  </div>`).join('');
+document.getElementById('fcount').textContent =
+  `${findings.filter(f => !f.soft).length} conflicts, ${findings.filter(f => f.soft).length} unreadable or blank`;
+
+/* ---------- drawer ---------- */
+const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer');
+const drHead = document.getElementById('drHead'), drBody = document.getElementById('drBody');
+let lastFocus = null;
+function open(s){
+  const m = model[s];
+  lastFocus = document.activeElement;
+  drHead.innerHTML = `
+    <div class="dk-id">${s} &middot; ${m.transport === 'AWB' ? 'air waybill set' : 'bill of lading set'} &middot; ${m.docsPresent.size} documents</div>
+    <h3>${m.goods}</h3>
+    <div class="dk-sub">${m.lane} &middot; ${m.ok} of ${m.checkable} cross-checked fields agree</div>`;
+  drBody.innerHTML = FIELDS.map(([fc,label],i) => {
+    const f = m.fields[fc];
+    if(f.state === 'none') return '';
+    const sl = {ok:'ok',bad:'bad',blur:'soft',gap:'soft',one:'one'}[f.state];
+    const st = {ok:'agrees',bad:'differs',blur:'unreadable',gap:'left blank',one:'single source'}[f.state];
+    const vals = f.reads.map(r => {
+      const txt = r.status === 'X' ? 'could not be read' : (r.value.trim() === '' ? '(box empty)' : r.value);
+      const off = r.outlier || r.status === 'X' || r.value.trim() === '';
+      return `<div class="vrow ${off ? 'off' : ''}">
+        <div class="d">${DOC_LABEL[r.col].replace(' · ','/')}</div>
+        <div><div class="t">${txt}</div><div class="ev">${r.note}</div></div>
+      </div>`;
+    }).join('');
+    return `<div class="frow" style="animation-delay:${i*35}ms">
+      <div class="fh"><div class="fn">${label}</div><div class="fs ${sl}">${st}</div></div>
+      <div class="vl">${vals}</div>
+    </div>`;
+  }).join('');
+  scrim.hidden = false; drawer.hidden = false;
+  requestAnimationFrame(() => { scrim.classList.add('on'); drawer.classList.add('on'); drawer.focus(); });
+}
+function shut(){
+  scrim.classList.remove('on'); drawer.classList.remove('on');
+  setTimeout(() => { scrim.hidden = true; drawer.hidden = true; }, 280);
+  if(lastFocus) lastFocus.focus();
+}
+scrim.addEventListener('click', shut);
+document.getElementById('close').addEventListener('click', shut);
+addEventListener('keydown', e => { if(e.key === 'Escape' && !drawer.hidden) shut(); });
+</script>
+
+</body></html>
